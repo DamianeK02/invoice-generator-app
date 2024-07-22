@@ -1,25 +1,55 @@
-import logo from './logo.svg';
-import './App.css';
+// src/App.js
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import CreateInvoice from './pages/CreateInvoice';
+import ManageClients from './pages/ManageClients';
+import DashboardPage from './pages/DashboardPage';
+import { Container, AppBar, Toolbar, Typography, Button } from '@mui/material';
 
-function App() {
+const App = () => {
+  const [clients, setClients] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+
+  useEffect(() => {
+    const storedClients = JSON.parse(localStorage.getItem('clients')) || [];
+    const storedInvoices = JSON.parse(localStorage.getItem('invoices')) || [];
+    setClients(storedClients);
+    setInvoices(storedInvoices);
+  }, []);
+
+  const handleAddClient = (client) => {
+    const updatedClients = [...clients, client];
+    setClients(updatedClients);
+    localStorage.setItem('clients', JSON.stringify(updatedClients));
+  };
+
+  const handleAddInvoice = (invoice) => {
+    const updatedInvoices = [...invoices, invoice];
+    setInvoices(updatedInvoices);
+    localStorage.setItem('invoices', JSON.stringify(updatedInvoices));
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Invoice App
+          </Typography>
+          <Button color="inherit" component={Link} to="/">Create Invoice</Button>
+          <Button color="inherit" component={Link} to="/manage-clients">Manage Clients</Button>
+          <Button color="inherit" component={Link} to="/dashboard">Dashboard</Button>
+        </Toolbar>
+      </AppBar>
+      <Container>
+        <Routes>
+          <Route exact path="/" element={<CreateInvoice onAddInvoice={handleAddInvoice} clients={clients} />} />
+          <Route path="/manage-clients" element={<ManageClients onAddClient={handleAddClient} clients={clients} />} />
+          <Route path="/dashboard" element={<DashboardPage invoices={invoices} />} />
+        </Routes>
+      </Container>
+    </Router>
   );
-}
+};
 
 export default App;
